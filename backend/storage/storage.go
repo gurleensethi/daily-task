@@ -1,6 +1,11 @@
 package storage
 
+import "context"
+
 type Storage interface {
-	Store([]byte) error
-	Read() []byte
+	Open() error
+	Close() error
+	Read() ([]byte, error)
+	OverWrite([]byte) error
+	Startup(ctx context.Context)
 }

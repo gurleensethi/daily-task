@@ -5,3 +5,5 @@ import {models} from '../models';
 export function CreateTask(arg1:models.CreateTask):void;
 
 export function GetAllTasks():Promise<Array<models.Task>>;
+
+export function Load():void;

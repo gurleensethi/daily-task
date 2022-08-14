@@ -10,6 +10,7 @@ type Task struct {
 }
 
 type CreateTask struct {
-	Title    string `json:"title"`
-	TaskType string `json:"taskType"`
+	Title    string        `json:"title"`
+	TaskType string        `json:"taskType"`
+	TaskTime time.Duration `json:"taskTime"`
 }

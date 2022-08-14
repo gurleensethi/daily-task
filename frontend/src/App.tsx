@@ -2,7 +2,7 @@ import "./App.css";
 import { CreateTask, GetAllTasks } from "../wailsjs/go/taskmanager/TaskManager";
 import { models } from "../wailsjs/go/models";
 import { CreateNewTaskDialog } from "./CreateNewTaskDialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 async function createNewTask(task: models.CreateTask) {
   await CreateTask(task);
@@ -15,6 +15,15 @@ async function getAllTasks(): Promise<models.Task[]> {
 function App() {
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
   const [tasks, setTasks] = useState<models.Task[]>([]);
+
+  useEffect(() => {
+    async function getTasks() {
+      const tasks = await getAllTasks();
+      setTasks(tasks);
+    }
+
+    getTasks();
+  }, []);
 
   const handleTaskCreate = async (task: models.CreateTask) => {
     await createNewTask(task);

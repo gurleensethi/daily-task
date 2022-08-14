@@ -3,6 +3,7 @@ export namespace models {
 	export class CreateTask {
 	    title: string;
 	    taskType: string;
+	    taskTime: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CreateTask(source);
@@ -12,6 +13,7 @@ export namespace models {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.title = source["title"];
 	        this.taskType = source["taskType"];
+	        this.taskTime = source["taskTime"];
 	    }
 	}
 	export class Task {

@@ -9,3 +9,7 @@ export function CreateTask(arg1) {
 export function GetAllTasks() {
   return window['go']['taskmanager']['TaskManager']['GetAllTasks']();
 }
+
+export function Load() {
+  return window['go']['taskmanager']['TaskManager']['Load']();
+}
