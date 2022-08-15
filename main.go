@@ -43,9 +43,10 @@ func main() {
 				panic(err)
 			}
 
-			taskManager.Load()
+			taskManager.Start(ctx)
 		},
 		OnShutdown: func(ctx context.Context) {
+			taskManager.Stop()
 			fileStorage.Close()
 		},
 		Bind: []interface{}{

@@ -18,7 +18,8 @@ export namespace models {
 	}
 	export class TimerTask {
 	    taskTime: number;
-	    isRunning: boolean;
+	    status: string;
+	    startedAt: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new TimerTask(source);
@@ -27,7 +28,8 @@ export namespace models {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.taskTime = source["taskTime"];
-	        this.isRunning = source["isRunning"];
+	        this.status = source["status"];
+	        this.startedAt = source["startedAt"];
 	    }
 	}
 	export class Task {

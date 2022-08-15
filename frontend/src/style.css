@@ -28,3 +28,8 @@ body {
   @apply text-white bg-blue-600 px-3 py-2 rounded-md transition-all;
   @apply hover:shadow-md hover:bg-blue-700 active:bg-blue-800;
 }
+
+.btn.secondary {
+  @apply bg-blue-50 text-blue-600;
+  @apply hover:bg-blue-100 active:bg-blue-200;
+}

@@ -1,6 +1,11 @@
 import "./App.css";
-import { CreateTask, GetAllTasks } from "../wailsjs/go/taskmanager/TaskManager";
+import {
+  CreateTask,
+  GetAllTasks,
+  StartTimedTask,
+} from "../wailsjs/go/taskmanager/TaskManager";
 import { models } from "../wailsjs/go/models";
+import { EventsOff, EventsOn } from "../wailsjs/runtime";
 import { CreateNewTaskDialog } from "./CreateNewTaskDialog";
 import { useEffect, useState } from "react";
 
@@ -38,7 +43,7 @@ function timeNumToDisplayStr(num: number): string {
   }
 
   if (numSeconds > 0 || minutes > 0 || hours > 0) {
-    displayStr += " " + String(numSeconds) + " sec";
+    displayStr += " " + String(Math.floor(numSeconds)) + " sec";
     if (numSeconds > 1) {
       displayStr += "s";
     }
@@ -116,19 +121,52 @@ function NoneTask(props: { task: models.Task }) {
 function TimerTask(props: { task: models.Task }) {
   const { task } = props;
   const timerTask = task.timerTask as models.TimerTask;
-  console.log(task);
+  const [updatedTask, setUpdatedTask] = useState(task);
+
+  useEffect(() => {
+    EventsOn("task_updates::" + task.id, (task) => {
+      setUpdatedTask(task);
+    });
+
+    return () => EventsOff("task_updates::" + task.id);
+  }, []);
+
+  const handleStartTaskTimer = () => {
+    StartTimedTask(task);
+  };
 
   return (
     <div className="flex w-full items-center cursor-pointer">
       <div className="flex-grow">
         <TaskTitle title={task.title} />
         <div className="text-xs text-gray-500">
-          Time allowed for task {timeNumToDisplayStr(timerTask.taskTime)}
-          <span className="font-medium"></span>
+          Time allowed for task{" "}
+          <span className="font-medium">
+            {timeNumToDisplayStr(timerTask.taskTime)}
+          </span>
         </div>
       </div>
-      <div className="">
-        <button className="btn text-xs">Start</button>
+      <div className="flex">
+        {(updatedTask.timerTask as models.TimerTask).status === "running" && (
+          <div className="text-sm text-blue-500">
+            {timeNumToDisplayStr(
+              timerTask.taskTime -
+                (Date.now() -
+                  (updatedTask.timerTask as models.TimerTask).startedAt)
+            )}
+          </div>
+        )}
+        {updatedTask.timerTask?.status === "default" && (
+          <button
+            className="btn secondary text-xs"
+            onClick={handleStartTaskTimer}
+          >
+            Start
+          </button>
+        )}
+        {updatedTask.timerTask?.status === "finished" && (
+          <div className="text-xs">Finished</div>
+        )}
       </div>
     </div>
   );

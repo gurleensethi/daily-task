@@ -10,6 +10,14 @@ export function GetAllTasks() {
   return window['go']['taskmanager']['TaskManager']['GetAllTasks']();
 }
 
-export function Load() {
-  return window['go']['taskmanager']['TaskManager']['Load']();
+export function Start(arg1) {
+  return window['go']['taskmanager']['TaskManager']['Start'](arg1);
+}
+
+export function StartTimedTask(arg1) {
+  return window['go']['taskmanager']['TaskManager']['StartTimedTask'](arg1);
+}
+
+export function Stop() {
+  return window['go']['taskmanager']['TaskManager']['Stop']();
 }

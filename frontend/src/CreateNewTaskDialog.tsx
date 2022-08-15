@@ -41,7 +41,7 @@ export function CreateNewTaskDialog(props: {
       onClick={handleOnClose}
     >
       <div
-        className="m-8 p-8 bg-white max-h-[90%] rounded-md shadow-lg"
+        className="m-8 p-8 bg-white max-h-[90%] rounded-md shadow-lg overflow-y-scroll"
         onClick={(e) => e.stopPropagation()}
       >
         <input

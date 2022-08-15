@@ -2,20 +2,26 @@ package taskmanager
 
 import (
 	"bytes"
+	"context"
 	"dailytask/backend/models"
 	"dailytask/backend/storage"
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/logger"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type TaskManager struct {
-	l       logger.Logger
-	storage storage.Storage
-	tasks   []models.Task
+	ctx        context.Context
+	l          logger.Logger
+	storage    storage.Storage
+	mutext     sync.Mutex
+	saveMutext sync.Mutex
+	tasks      []models.Task
 }
 
 func NewTaskManager(logger logger.Logger, storage storage.Storage) TaskManager {
@@ -25,12 +31,50 @@ func NewTaskManager(logger logger.Logger, storage storage.Storage) TaskManager {
 	}
 }
 
-func (tm *TaskManager) Load() {
+func (tm *TaskManager) Start(ctx context.Context) {
+	tm.ctx = ctx
+
 	tm.tasks = make([]models.Task, 0)
 	b, _ := tm.storage.Read()
 	buffer := bytes.NewBuffer(b)
 	decoder := json.NewDecoder(buffer)
 	decoder.Decode(&tm.tasks)
+
+	go func() {
+		ticker := time.NewTicker(time.Second)
+
+		for {
+			select {
+			case <-ctx.Done():
+				ticker.Stop()
+				return
+			case <-ticker.C:
+				for _, task := range tm.tasks {
+					if task.TaskType == "timer" {
+						now := time.Now()
+
+						if task.TimerTask.Status == "running" &&
+							now.UnixMilli() > task.TimerTask.StartedAt+int64(task.TimerTask.TaskTime) {
+							tm.mutext.Lock()
+							task.TimerTask.Status = models.Finished
+							tm.mutext.Unlock()
+
+							tm.save()
+						}
+
+						runtime.EventsEmit(ctx, "task_updates::"+task.ID, task)
+					}
+				}
+			}
+		}
+	}()
+}
+
+func (tm *TaskManager) Stop() {
+	tm.saveMutext.Lock()
+	defer tm.saveMutext.Unlock()
+
+	tm.save()
 }
 
 func (tm *TaskManager) CreateTask(task models.CreateTask) {
@@ -44,15 +88,35 @@ func (tm *TaskManager) CreateTask(task models.CreateTask) {
 	if task.TaskType == models.Timer {
 		newTask.TimerTask = &models.TimerTask{
 			TaskTime: task.TaskTime,
+			Status:   models.Default,
 		}
 	}
 
+	tm.mutext.Lock()
 	tm.tasks = append(tm.tasks, newTask)
+	tm.mutext.Unlock()
+
 	tm.save()
 }
 
 func (tm *TaskManager) GetAllTasks() []models.Task {
 	return tm.tasks
+}
+
+func (tm *TaskManager) StartTimedTask(task models.Task) error {
+	if task.TaskType != models.Timer {
+		return fmt.Errorf("task is not a timer task")
+	}
+
+	for _, t := range tm.tasks {
+		if t.ID == task.ID {
+			t.TimerTask.Status = models.Running
+			t.TimerTask.StartedAt = time.Now().UnixMilli()
+			break
+		}
+	}
+
+	return nil
 }
 
 func (tm *TaskManager) save() {

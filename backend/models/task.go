@@ -2,6 +2,14 @@ package models
 
 import "time"
 
+type TimerTaskStatus string
+
+const (
+	Default  TimerTaskStatus = "default"
+	Running  TimerTaskStatus = "running"
+	Finished TimerTaskStatus = "finished"
+)
+
 const (
 	None     string = "none"
 	Timer    string = "timer"
@@ -9,8 +17,9 @@ const (
 )
 
 type TimerTask struct {
-	TaskTime  time.Duration `json:"taskTime"`
-	IsRunning bool          `json:"isRunning"`
+	TaskTime  time.Duration   `json:"taskTime"`
+	Status    TimerTaskStatus `json:"status"`
+	StartedAt int64           `json:"startedAt"`
 }
 
 type Task struct {
