@@ -16,10 +16,26 @@ export namespace models {
 	        this.taskTime = source["taskTime"];
 	    }
 	}
+	export class TimerTask {
+	    taskTime: number;
+	    isRunning: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new TimerTask(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.taskTime = source["taskTime"];
+	        this.isRunning = source["isRunning"];
+	    }
+	}
 	export class Task {
 	    id: string;
 	    title: string;
 	    taskType: string;
+	    // Go type: TimerTask
+	    timerTask?: any;
 	    // Go type: time.Time
 	    time: any;
 	
@@ -32,6 +48,7 @@ export namespace models {
 	        this.id = source["id"];
 	        this.title = source["title"];
 	        this.taskType = source["taskType"];
+	        this.timerTask = this.convertValues(source["timerTask"], null);
 	        this.time = this.convertValues(source["time"], null);
 	    }
 	

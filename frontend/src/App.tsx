@@ -12,6 +12,41 @@ async function getAllTasks(): Promise<models.Task[]> {
   return GetAllTasks();
 }
 
+function timeNumToDisplayStr(num: number): string {
+  let numSeconds = num / 1000;
+
+  const hours = Math.floor(numSeconds / 3600);
+  numSeconds = numSeconds - 3600 * hours;
+
+  const minutes = Math.floor(numSeconds / 60);
+  numSeconds = numSeconds - 60 * minutes;
+
+  let displayStr = "";
+
+  if (hours > 0) {
+    displayStr += String(hours) + " hr";
+    if (hours > 1) {
+      displayStr += "s";
+    }
+  }
+
+  if (minutes > 0 || hours > 0) {
+    displayStr += " " + String(minutes) + " min";
+    if (minutes > 1) {
+      displayStr += "s";
+    }
+  }
+
+  if (numSeconds > 0 || minutes > 0 || hours > 0) {
+    displayStr += " " + String(numSeconds) + " sec";
+    if (numSeconds > 1) {
+      displayStr += "s";
+    }
+  }
+
+  return displayStr;
+}
+
 function App() {
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
   const [tasks, setTasks] = useState<models.Task[]>([]);
@@ -41,12 +76,13 @@ function App() {
         />
       )}
       <div className="text-2xl">Tasks</div>
-      <div className="p-2 bg-gray-100 mt-4 rounded-md">
+      <div className="p-2 bg-gray-200 mt-4 rounded-md">
         {tasks.length === 0 && "No tasks found"}
-        {tasks.map((item) => {
+        {tasks.map((task) => {
           return (
-            <div className="p-4 bg-white rounded-md shadow-sm mb-2">
-              <div className="text-lg ">{item.title}</div>
+            <div className="p-4 bg-white rounded-md shadow-sm mb-2 last:mb-0">
+              {task.taskType === "none" && <NoneTask task={task} />}
+              {task.taskType === "timer" && <TimerTask task={task} />}
             </div>
           );
         })}
@@ -57,6 +93,43 @@ function App() {
       >
         Create Task +
       </button>
+    </div>
+  );
+}
+
+function TaskTitle(props: { title: string }) {
+  return <div className="text-xl">{props.title}</div>;
+}
+
+function NoneTask(props: { task: models.Task }) {
+  const { task } = props;
+
+  return (
+    <div className="flex w-full items-center cursor-pointer">
+      <div className="flex-grow">
+        <TaskTitle title={task.title} />
+      </div>
+    </div>
+  );
+}
+
+function TimerTask(props: { task: models.Task }) {
+  const { task } = props;
+  const timerTask = task.timerTask as models.TimerTask;
+  console.log(task);
+
+  return (
+    <div className="flex w-full items-center cursor-pointer">
+      <div className="flex-grow">
+        <TaskTitle title={task.title} />
+        <div className="text-xs text-gray-500">
+          Time allowed for task {timeNumToDisplayStr(timerTask.taskTime)}
+          <span className="font-medium"></span>
+        </div>
+      </div>
+      <div className="">
+        <button className="btn text-xs">Start</button>
+      </div>
     </div>
   );
 }

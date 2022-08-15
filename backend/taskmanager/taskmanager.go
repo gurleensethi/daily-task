@@ -34,12 +34,20 @@ func (tm *TaskManager) Load() {
 }
 
 func (tm *TaskManager) CreateTask(task models.CreateTask) {
-	tm.tasks = append(tm.tasks, models.Task{
+	newTask := models.Task{
 		ID:        strconv.FormatInt(time.Now().UnixMilli(), 10),
 		Title:     task.Title,
 		TaskType:  task.TaskType,
 		CreatedAt: time.Now(),
-	})
+	}
+
+	if task.TaskType == models.Timer {
+		newTask.TimerTask = &models.TimerTask{
+			TaskTime: task.TaskTime,
+		}
+	}
+
+	tm.tasks = append(tm.tasks, newTask)
 	tm.save()
 }
 
