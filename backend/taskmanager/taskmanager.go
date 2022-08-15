@@ -49,12 +49,16 @@ func (tm *TaskManager) Start(ctx context.Context) {
 				ticker.Stop()
 				return
 			case <-ticker.C:
+				var playNotificationSound bool
+
 				for _, task := range tm.tasks {
 					if task.TaskType == "timer" {
 						now := time.Now()
 
 						if task.TimerTask.Status == "running" &&
 							now.UnixMilli() > task.TimerTask.StartedAt+int64(task.TimerTask.TaskTime) {
+							playNotificationSound = true
+
 							tm.mutext.Lock()
 							task.TimerTask.Status = models.Finished
 							tm.mutext.Unlock()
@@ -64,6 +68,10 @@ func (tm *TaskManager) Start(ctx context.Context) {
 
 						runtime.EventsEmit(ctx, "task_updates::"+task.ID, task)
 					}
+				}
+
+				if playNotificationSound {
+					runtime.EventsEmit(ctx, "notification_sound", "timer_finished")
 				}
 			}
 		}
@@ -129,7 +137,7 @@ func (tm *TaskManager) GetTaskByID(ID string) *models.Task {
 	return nil
 }
 
-func (tm *TaskManager) DeleteTaskByID(ID string) {
+func (tm *TaskManager) DeleteTaskByID(ID string) error {
 	index := -1
 	for i, task := range tm.tasks {
 		if task.ID == ID {
@@ -142,7 +150,11 @@ func (tm *TaskManager) DeleteTaskByID(ID string) {
 		tm.mutext.Lock()
 		tm.tasks = append(tm.tasks[:index], tm.tasks[index+1:]...)
 		tm.mutext.Unlock()
+
+		tm.save()
 	}
+
+	return nil
 }
 
 func (tm *TaskManager) save() {

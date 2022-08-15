@@ -5,7 +5,7 @@ import {context} from '../models';
 
 export function CreateTask(arg1:models.CreateTask):void;
 
-export function DeleteTaskByID(arg1:string):void;
+export function DeleteTaskByID(arg1:string):Promise<Error>;
 
 export function GetAllTasks():Promise<Array<models.Task>>;
 

@@ -10,10 +10,24 @@ export function CreateNewTaskDialog(props: {
   onClose?: () => void;
 }) {
   const [title, setTitle] = useState("");
+  const [titleError, setTitleError] = useState("");
   const [taskType, setTaskType] = useState<TaskType>("none");
   const [taskTime, setTaskTime] = useState(0);
+  const [timerError, setTimerError] = useState("");
 
   const handleTaskCreate = () => {
+    setTitleError("");
+
+    if (title.trim().length < 4) {
+      setTitleError("Enter a longer title");
+      return;
+    }
+
+    if (taskType === "timer" && taskTime === 0) {
+      setTimerError("Enter a valid time");
+      return;
+    }
+
     const task = new models.CreateTask();
     task.title = title;
     task.taskType = taskType;
@@ -28,7 +42,13 @@ export function CreateNewTaskDialog(props: {
   };
 
   const handleOnTimeChange = (time: number) => {
+    setTimerError("");
     setTaskTime(time);
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitleError("");
+    setTitle(e.target.value);
   };
 
   if (!props.isOpen) {
@@ -48,9 +68,12 @@ export function CreateNewTaskDialog(props: {
           placeholder="Enter task name"
           className="text-2xl border-none outline-none w-full font-medium"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={handleTitleChange}
           autoFocus
         />
+        {titleError && (
+          <div className="text-xs text-red-500 mt-1">{titleError}</div>
+        )}
         <div className="mt-8">
           <div className="text-xl">Task Type</div>
           <div className="text-gray-500 text-sm">Select the type of task</div>
@@ -92,7 +115,12 @@ export function CreateNewTaskDialog(props: {
         </div>
         <div className="mt-4">
           {taskType == "timer" && (
-            <TimerOptions onTimeChange={handleOnTimeChange} />
+            <>
+              <TimerOptions onTimeChange={handleOnTimeChange} />
+              {timerError && (
+                <div className="text-xs text-red-500 mt-1">{timerError}</div>
+              )}
+            </>
           )}
         </div>
         <div className="flex justify-end">

@@ -10,13 +10,10 @@ import { CreateNewTaskDialog } from "./CreateNewTaskDialog";
 import React, { useEffect, useState } from "react";
 import { TaskDetailDialog } from "./TaskDetailDialog";
 import { timeNumToDisplayStr } from "./utils";
+import { NotificationProvider } from "./NotificationProvider";
 
 async function createNewTask(task: models.CreateTask) {
   await CreateTask(task);
-}
-
-async function getAllTasks(): Promise<models.Task[]> {
-  return GetAllTasks();
 }
 
 function App() {
@@ -25,7 +22,7 @@ function App() {
   const [selectedTask, setSelectedTask] = useState<models.Task | null>(null);
 
   async function fetchTasks() {
-    const tasks = await getAllTasks();
+    const tasks = await GetAllTasks();
     setTasks(tasks);
   }
 
@@ -35,7 +32,7 @@ function App() {
 
   const handleTaskCreate = async (task: models.CreateTask) => {
     await createNewTask(task);
-    setTasks(await getAllTasks());
+    fetchTasks();
     setCreateDialogOpen(false);
   };
 
@@ -52,48 +49,50 @@ function App() {
   };
 
   return (
-    <div className="p-4 pb-32 select-none">
-      {isCreateDialogOpen && (
-        <CreateNewTaskDialog
-          isOpen={isCreateDialogOpen}
-          onCreateTask={handleTaskCreate}
-          onClose={() => setCreateDialogOpen(false)}
-        />
-      )}
-      <div className="text-2xl">Tasks</div>
-      <div className="p-2 bg-gray-200 mt-4 rounded-md">
-        {tasks.length === 0 && (
-          <div className="m-2">
-            No tasks found! Go ahead and create some tasks.
-          </div>
+    <NotificationProvider>
+      <div className="p-4 pb-32 select-none">
+        {isCreateDialogOpen && (
+          <CreateNewTaskDialog
+            isOpen={isCreateDialogOpen}
+            onCreateTask={handleTaskCreate}
+            onClose={() => setCreateDialogOpen(false)}
+          />
         )}
-        {tasks.map((task) => {
-          return (
-            <div
-              key={task.id}
-              className="p-4 bg-white rounded-md shadow-sm mb-2 last:mb-0 cursor-pointer"
-              onClick={() => handleTaskClick(task)}
-            >
-              {task.taskType === "none" && <NoneTask task={task} />}
-              {task.taskType === "timer" && <TimerTask task={task} />}
+        <div className="text-2xl">Tasks</div>
+        <div className="p-2 bg-gray-200 mt-4 rounded-md">
+          {tasks.length === 0 && (
+            <div className="m-2">
+              No tasks found! Go ahead and create some tasks.
             </div>
-          );
-        })}
+          )}
+          {tasks.map((task) => {
+            return (
+              <div
+                key={task.id}
+                className="p-4 bg-white rounded-md shadow-sm mb-2 last:mb-0 cursor-pointer"
+                onClick={() => handleTaskClick(task)}
+              >
+                {task.taskType === "none" && <NoneTask task={task} />}
+                {task.taskType === "timer" && <TimerTask task={task} />}
+              </div>
+            );
+          })}
+        </div>
+        <button
+          onClick={() => setCreateDialogOpen(true)}
+          className="btn fixed bottom-8 right-8"
+        >
+          Create Task +
+        </button>
+        {selectedTask && (
+          <TaskDetailDialog
+            taskID={selectedTask.id}
+            onClose={handleTaskDialogClose}
+            onTaskDelete={handleTaskDelete}
+          />
+        )}
       </div>
-      <button
-        onClick={() => setCreateDialogOpen(true)}
-        className="btn fixed bottom-8 right-8"
-      >
-        Create Task +
-      </button>
-      {selectedTask && (
-        <TaskDetailDialog
-          taskID={selectedTask.id}
-          onClose={handleTaskDialogClose}
-          onTaskDelete={handleTaskDelete}
-        />
-      )}
-    </div>
+    </NotificationProvider>
   );
 }
 

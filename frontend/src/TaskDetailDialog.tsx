@@ -19,7 +19,7 @@ export const TaskDetailDialog = (props: {
       const task = await GetTaskByID(taskID);
       setTask(task);
     }
-
+    
     fetchTaskByID();
   }, []);
 
@@ -28,7 +28,7 @@ export const TaskDetailDialog = (props: {
   };
 
   const handleDeleteTask = async () => {
-    DeleteTaskByID(taskID);
+    await DeleteTaskByID(taskID);
     onTaskDelete();
     onClose();
   };
