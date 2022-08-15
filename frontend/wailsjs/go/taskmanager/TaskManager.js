@@ -6,8 +6,16 @@ export function CreateTask(arg1) {
   return window['go']['taskmanager']['TaskManager']['CreateTask'](arg1);
 }
 
+export function DeleteTaskByID(arg1) {
+  return window['go']['taskmanager']['TaskManager']['DeleteTaskByID'](arg1);
+}
+
 export function GetAllTasks() {
   return window['go']['taskmanager']['TaskManager']['GetAllTasks']();
+}
+
+export function GetTaskByID(arg1) {
+  return window['go']['taskmanager']['TaskManager']['GetTaskByID'](arg1);
 }
 
 export function Start(arg1) {

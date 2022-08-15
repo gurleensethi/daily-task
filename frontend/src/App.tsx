@@ -7,7 +7,9 @@ import {
 import { models } from "../wailsjs/go/models";
 import { EventsOff, EventsOn } from "../wailsjs/runtime";
 import { CreateNewTaskDialog } from "./CreateNewTaskDialog";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { TaskDetailDialog } from "./TaskDetailDialog";
+import { timeNumToDisplayStr } from "./utils";
 
 async function createNewTask(task: models.CreateTask) {
   await CreateTask(task);
@@ -17,58 +19,36 @@ async function getAllTasks(): Promise<models.Task[]> {
   return GetAllTasks();
 }
 
-function timeNumToDisplayStr(num: number): string {
-  let numSeconds = num / 1000;
-
-  const hours = Math.floor(numSeconds / 3600);
-  numSeconds = numSeconds - 3600 * hours;
-
-  const minutes = Math.floor(numSeconds / 60);
-  numSeconds = numSeconds - 60 * minutes;
-
-  let displayStr = "";
-
-  if (hours > 0) {
-    displayStr += String(hours) + " hr";
-    if (hours > 1) {
-      displayStr += "s";
-    }
-  }
-
-  if (minutes > 0 || hours > 0) {
-    displayStr += " " + String(minutes) + " min";
-    if (minutes > 1) {
-      displayStr += "s";
-    }
-  }
-
-  if (numSeconds > 0 || minutes > 0 || hours > 0) {
-    displayStr += " " + String(Math.floor(numSeconds)) + " sec";
-    if (numSeconds > 1) {
-      displayStr += "s";
-    }
-  }
-
-  return displayStr;
-}
-
 function App() {
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
   const [tasks, setTasks] = useState<models.Task[]>([]);
+  const [selectedTask, setSelectedTask] = useState<models.Task | null>(null);
+
+  async function fetchTasks() {
+    const tasks = await getAllTasks();
+    setTasks(tasks);
+  }
 
   useEffect(() => {
-    async function getTasks() {
-      const tasks = await getAllTasks();
-      setTasks(tasks);
-    }
-
-    getTasks();
+    fetchTasks();
   }, []);
 
   const handleTaskCreate = async (task: models.CreateTask) => {
     await createNewTask(task);
     setTasks(await getAllTasks());
     setCreateDialogOpen(false);
+  };
+
+  const handleTaskClick = (task: models.Task) => {
+    setSelectedTask(task);
+  };
+
+  const handleTaskDialogClose = () => {
+    setSelectedTask(null);
+  };
+
+  const handleTaskDelete = () => {
+    fetchTasks();
   };
 
   return (
@@ -82,10 +62,18 @@ function App() {
       )}
       <div className="text-2xl">Tasks</div>
       <div className="p-2 bg-gray-200 mt-4 rounded-md">
-        {tasks.length === 0 && "No tasks found"}
+        {tasks.length === 0 && (
+          <div className="m-2">
+            No tasks found! Go ahead and create some tasks.
+          </div>
+        )}
         {tasks.map((task) => {
           return (
-            <div className="p-4 bg-white rounded-md shadow-sm mb-2 last:mb-0">
+            <div
+              key={task.id}
+              className="p-4 bg-white rounded-md shadow-sm mb-2 last:mb-0 cursor-pointer"
+              onClick={() => handleTaskClick(task)}
+            >
               {task.taskType === "none" && <NoneTask task={task} />}
               {task.taskType === "timer" && <TimerTask task={task} />}
             </div>
@@ -98,6 +86,13 @@ function App() {
       >
         Create Task +
       </button>
+      {selectedTask && (
+        <TaskDetailDialog
+          taskID={selectedTask.id}
+          onClose={handleTaskDialogClose}
+          onTaskDelete={handleTaskDelete}
+        />
+      )}
     </div>
   );
 }
@@ -131,12 +126,13 @@ function TimerTask(props: { task: models.Task }) {
     return () => EventsOff("task_updates::" + task.id);
   }, []);
 
-  const handleStartTaskTimer = () => {
+  const handleStartTaskTimer = (e: React.MouseEvent) => {
+    e.stopPropagation();
     StartTimedTask(task);
   };
 
   return (
-    <div className="flex w-full items-center cursor-pointer">
+    <div className="flex w-full items-center">
       <div className="flex-grow">
         <TaskTitle title={task.title} />
         <div className="text-xs text-gray-500">
@@ -165,7 +161,7 @@ function TimerTask(props: { task: models.Task }) {
           </button>
         )}
         {updatedTask.timerTask?.status === "finished" && (
-          <div className="text-xs">Finished</div>
+          <div className="text-xs text-gray-500">Finished</div>
         )}
       </div>
     </div>

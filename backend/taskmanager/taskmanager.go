@@ -93,7 +93,7 @@ func (tm *TaskManager) CreateTask(task models.CreateTask) {
 	}
 
 	tm.mutext.Lock()
-	tm.tasks = append(tm.tasks, newTask)
+	tm.tasks = append([]models.Task{newTask}, tm.tasks...)
 	tm.mutext.Unlock()
 
 	tm.save()
@@ -117,6 +117,32 @@ func (tm *TaskManager) StartTimedTask(task models.Task) error {
 	}
 
 	return nil
+}
+
+func (tm *TaskManager) GetTaskByID(ID string) *models.Task {
+	for _, task := range tm.tasks {
+		if task.ID == ID {
+			return &task
+		}
+	}
+
+	return nil
+}
+
+func (tm *TaskManager) DeleteTaskByID(ID string) {
+	index := -1
+	for i, task := range tm.tasks {
+		if task.ID == ID {
+			index = i
+			break
+		}
+	}
+
+	if index >= 0 {
+		tm.mutext.Lock()
+		tm.tasks = append(tm.tasks[:index], tm.tasks[index+1:]...)
+		tm.mutext.Unlock()
+	}
 }
 
 func (tm *TaskManager) save() {

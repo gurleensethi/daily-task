@@ -5,7 +5,11 @@ import {context} from '../models';
 
 export function CreateTask(arg1:models.CreateTask):void;
 
+export function DeleteTaskByID(arg1:string):void;
+
 export function GetAllTasks():Promise<Array<models.Task>>;
+
+export function GetTaskByID(arg1:string):Promise<models.Task>;
 
 export function Start(arg1:context.Context):void;
 
