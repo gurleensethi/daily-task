@@ -87,10 +87,11 @@ func (tm *TaskManager) Stop() {
 
 func (tm *TaskManager) CreateTask(task models.CreateTask) {
 	newTask := models.Task{
-		ID:        strconv.FormatInt(time.Now().UnixMilli(), 10),
-		Title:     task.Title,
-		TaskType:  task.TaskType,
-		CreatedAt: time.Now(),
+		ID:          strconv.FormatInt(time.Now().UnixMilli(), 10),
+		Title:       task.Title,
+		TaskType:    task.TaskType,
+		CreatedAt:   time.Now(),
+		Description: task.Description,
 	}
 
 	if task.TaskType == models.Timer {

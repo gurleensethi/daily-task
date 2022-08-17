@@ -10,6 +10,7 @@ export function CreateNewTaskDialog(props: {
   onClose?: () => void;
 }) {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [titleError, setTitleError] = useState("");
   const [taskType, setTaskType] = useState<TaskType>("none");
   const [taskTime, setTaskTime] = useState(0);
@@ -30,6 +31,7 @@ export function CreateNewTaskDialog(props: {
 
     const task = new models.CreateTask();
     task.title = title;
+    task.description = description;
     task.taskType = taskType;
     task.taskTime = taskTime;
     props.onCreateTask(task);
@@ -74,6 +76,13 @@ export function CreateNewTaskDialog(props: {
         {titleError && (
           <div className="text-xs text-red-500 mt-1">{titleError}</div>
         )}
+        <textarea
+          placeholder="Description...(optional)"
+          className="border-none outline-none w-full mt-4 resize-none"
+          value={description}
+          rows={3}
+          onChange={(e) => setDescription(e.target.value)}
+        />
         <div className="mt-8">
           <div className="text-xl">Task Type</div>
           <div className="text-gray-500 text-sm">Select the type of task</div>

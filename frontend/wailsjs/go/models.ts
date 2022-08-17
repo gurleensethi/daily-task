@@ -2,6 +2,7 @@ export namespace models {
 	
 	export class CreateTask {
 	    title: string;
+	    description: string;
 	    taskType: string;
 	    taskTime: number;
 	
@@ -12,6 +13,7 @@ export namespace models {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.title = source["title"];
+	        this.description = source["description"];
 	        this.taskType = source["taskType"];
 	        this.taskTime = source["taskTime"];
 	    }
@@ -35,11 +37,12 @@ export namespace models {
 	export class Task {
 	    id: string;
 	    title: string;
+	    description: string;
 	    taskType: string;
 	    // Go type: TimerTask
 	    timerTask?: any;
 	    // Go type: time.Time
-	    time: any;
+	    createdAt: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new Task(source);
@@ -49,9 +52,10 @@ export namespace models {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.title = source["title"];
+	        this.description = source["description"];
 	        this.taskType = source["taskType"];
 	        this.timerTask = this.convertValues(source["timerTask"], null);
-	        this.time = this.convertValues(source["time"], null);
+	        this.createdAt = this.convertValues(source["createdAt"], null);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

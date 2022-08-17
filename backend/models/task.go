@@ -23,15 +23,17 @@ type TimerTask struct {
 }
 
 type Task struct {
-	ID        string     `json:"id"`
-	Title     string     `json:"title"`
-	TaskType  string     `json:"taskType"`
-	TimerTask *TimerTask `json:"timerTask"`
-	CreatedAt time.Time  `json:"time"`
+	ID          string     `json:"id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	TaskType    string     `json:"taskType"`
+	TimerTask   *TimerTask `json:"timerTask"`
+	CreatedAt   time.Time  `json:"createdAt"`
 }
 
 type CreateTask struct {
-	Title    string        `json:"title"`
-	TaskType string        `json:"taskType"`
-	TaskTime time.Duration `json:"taskTime"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	TaskType    string        `json:"taskType"`
+	TaskTime    time.Duration `json:"taskTime"`
 }
